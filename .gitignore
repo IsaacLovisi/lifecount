@@ -1,0 +1,13 @@
+node_modules
+
+.env
+
+flake.nix
+
+flake.lock
+
+life360.apk
+life360-patched.apk
+
+logs
+

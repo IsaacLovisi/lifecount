@@ -10,7 +10,10 @@
     let
       # Define a arquitetura do seu sistema (mude se estiver usando ARM/Mac)
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = import nixpkgs {
+	inherit system;
+	config = { allowUnfree = true; };
+	};
     in 
     {
       devShells.${system}.default = pkgs.mkShell {
@@ -20,6 +23,14 @@
 	  git
 	  mitmproxy
 	  android-tools
+	  android-studio
+	  jdk
+	  (vscode.override {
+            commandLineArgs = [
+              "--enable-features=UseOzonePlatform"
+              "--ozone-platform=wayland"
+            ];
+          })
           # O npm já vem embutido no nodejs_20, mas podemos declarar utilitários extras aqui se precisar no futuro
         ];
 
