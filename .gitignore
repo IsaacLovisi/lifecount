@@ -6,8 +6,7 @@ flake.nix
 
 flake.lock
 
-life360.apk
-life360-patched.apk
+reverse_engineering
 
 logs
 
