@@ -1,7 +1,9 @@
-import 'dotenv/config';
-import { Agent } from 'undici'; // Nativo do Node.js, não requer instalação
+//Services - Life360
 
-// Força uma assinatura TLS diferente da padrão do Node.js
+import 'dotenv/config';
+import { fetch, Agent } from 'undici';
+import type { CircleDTO, Life360CirclesResponse } from '../models/circles.ts';
+
 const tlsDispatcher = new Agent({
   connect: {
     ciphers: 'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256',
@@ -10,27 +12,36 @@ const tlsDispatcher = new Agent({
   }
 });
 
-export async function fetchCircles() {
+export async function fetchCircles(): Promise<CircleDTO[]> {
   const url = "https://api-cloudfront.life360.com/v3/circles.json";
   const token = process.env.LIFE360_TOKEN;
-  
+
   const response = await fetch(url, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`,
-      "Accept": "application/json",
-      "User-Agent": "com.life360.android.safetymapi/24.5.0"
+      "Accept": "*/*",
+      "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "Origin": "https://www.life360.com",
+      "Referer": "https://www.life360.com/",
+      "Accept-Language": "en-US,en;q=0.9"
     },
-    // Injeta o agente modificado para burlar o fingerprint do Cloudflare
-    // @ts-ignore - Necessário se a tipagem global do fetch ainda não mapear o dispatcher
     dispatcher: tlsDispatcher
   });
-  
+
   if (!response.ok) {
     const errorBody = await response.text();
     console.error("Corpo do erro retornado pela API:", errorBody.substring(0, 200));
     throw new Error(`Falha na Api Life360: ${response.status}`);
   }
-  
-  return response.json();
+
+  const rawData = (await response.json()) as Life360CirclesResponse;
+
+  return rawData.circles.map(circle => ({
+    id: circle.id,
+    name: circle.name,
+    color: `#${circle.color}`,
+    memberCount: circle.memberCount,
+    createdAt: circle.createdAt
+  }));
 }

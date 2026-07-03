@@ -1,8 +1,10 @@
+//Server - Life360 - index.ts
+
 import { config } from "dotenv";
 config();
 import express, { type Request, type Response } from "express";
 import { timeStamp } from "node:console";
-import circlesRoutes from './routes/circlesget/get-circles-routes';
+import circlesRoutes from './routes/circlesget/get-circles-routes.js';
 
 
 
